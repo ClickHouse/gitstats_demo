@@ -18,9 +18,13 @@ export default function PackageDetails({
         {home_page && (
           <a href={home_page} target="_blank" className="text-center pt-2">
             <button type="button">
-              <ArrowTopRightOnSquareIcon
+              <Image
                 className={`h-8 w-8 fill-white hover:fill-[#faff69]`}
                 aria-hidden="true"
+                src={"/arrow.svg"}
+                alt={`${name} homepage`}
+                width={16}
+                height={16}
               />
             </button>
           </a>
