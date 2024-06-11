@@ -14,7 +14,7 @@ If you prefer to watch a video showing the steps to build this application, watc
 
 ## Pre-requisites
 
-- >= node v20.9.0
+* `>=` node v20.9.0
 
 ## Getting started
 
@@ -88,7 +88,7 @@ stats AS (
 SELECT * FROM project_details, stats
 ```
 
-![]()
+![Create endpoint](./public/github_stats_endpoint.gif)
 
 ### Update local credentials
 
