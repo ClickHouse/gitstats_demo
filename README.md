@@ -21,7 +21,9 @@ If you prefer to watch a video showing the steps to build this application, watc
 Users can either sign up to a ClickHouse Cloud account or use the endpoint below to query the public [ClickPy](https://clickpy.clickhouse.com) service. This applies quotas.
 
 ```bash
-curl -H "Content-Type: application/json" -X 'POST' -s --user 'MdhWYPEpXaqiwGMjbXWT:4b1dKbabyQTvuKUWOnI08oXVbUD4tkaxKKjEwz7ORG' 'https://console-api.clickhouse.cloud/.api/query-endpoints/297797b1-c5b0-4741-9f5b-3d6456a9860d/run?format=JSONEachRow' --data-raw '{"queryVariables":{"package_name":"requests"}}'
+curl -H "Content-Type: application/json" -X 'POST' -s --user 'MdhWYPEpXaqiwGMjbXWT:4b1dKbabyQTvuKUWOnI08oXVbUD4tkaxKKjEwz7ORG'
+'https://console-api.clickhouse.cloud/.api/query-endpoints/297797b1-c5b0-4741-9f5b-3d6456a9860d/run?format=JSONEachRow'
+--data-raw '{"queryVariables":{"package_name":"requests"}}'
 ```
 
 If you using the public endpoint, skip to step (6) and run the app.
