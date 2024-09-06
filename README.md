@@ -16,34 +16,110 @@ If you prefer to watch a video showing the steps to build this application, watc
 
 * `>=` node v20.9.0
 
-## Getting started
+## 1. Getting started
 
-### Signup to ClickHouse Cloud
+Users can either sign up to a ClickHouse Cloud account or use the endpoint below to query the public [ClickPy](https://clickpy.clickhouse.com) service. This applies quotas.
 
-This demo requires a ClickHouse Cloud account. Users can sign up [here](https://clickhouse.cloud/signup) and receive $300 of free credits - more than sufficient for this demo.
+```bash
+curl -H "Content-Type: application/json" -X 'POST' -s --user 'MdhWYPEpXaqiwGMjbXWT:4b1dKbabyQTvuKUWOnI08oXVbUD4tkaxKKjEwz7ORG' 'https://console-api.clickhouse.cloud/.api/query-endpoints/297797b1-c5b0-4741-9f5b-3d6456a9860d/run?format=JSONEachRow' --data-raw '{"queryVariables":{"package_name":"requests"}}'
+```
 
-### Load the dataset
+If you using the public endpoint, skip to step (6) and run the app.
 
-Create the supporting tables for this demo:
+### 2. Signup to ClickHouse Cloud
+
+To reproduce this demo with your own cluster, requires a ClickHouse Cloud account. Users can sign up [here](https://clickhouse.cloud/signup) and receive $300 of free credits - more than sufficient for this demo.
+
+### 3. Load the dataset
+
+Create the supporting databases and tables for this demo:
 
 ```sql
+CREATE DATABASE pypi
+CREATE TABLE pypi.projects
+(
+    `metadata_version` String,
+    `name` String,
+    `version` String,
+    `summary` String,
+    `description` String,
+    `description_content_type` String,
+    `author` String,
+    `author_email` String,
+    `maintainer` String,
+    `maintainer_email` String,
+    `license` String,
+    `keywords` String,
+    `classifiers` Array(String),
+    `platform` Array(String),
+    `home_page` String,
+    `download_url` String,
+    `requires_python` String,
+    `requires` Array(String),
+    `provides` Array(String),
+    `obsoletes` Array(String),
+    `requires_dist` Array(String),
+    `provides_dist` Array(String),
+    `obsoletes_dist` Array(String),
+    `requires_external` Array(String),
+    `project_urls` Array(String),
+    `uploaded_via` String,
+    `upload_time` DateTime64(3),
+    `filename` String,
+    `size` Int64,
+    `path` String,
+    `python_version` String,
+    `packagetype` String,
+    `comment_text` String,
+    `has_signature` Bool,
+    `md5_digest` String,
+    `sha256_digest` String,
+    `blake2_256_digest` String
+)
+ENGINE = MergeTree
+ORDER BY name
+
+CREATE DATABASE github
+CREATE TABLE github.github_events
+(
+    `event_type` Enum8('CommitCommentEvent' = 1, 'CreateEvent' = 2, 'DeleteEvent' = 3, 'ForkEvent' = 4, 'GollumEvent' = 5, 'IssueCommentEvent' = 6, 'IssuesEvent' = 7, 'MemberEvent' = 8, 'PublicEvent' = 9, 'PullRequestEvent' = 10, 'PullRequestReviewCommentEvent' = 11, 'PushEvent' = 12, 'ReleaseEvent' = 13, 'SponsorshipEvent' = 14, 'WatchEvent' = 15, 'GistEvent' = 16, 'FollowEvent' = 17, 'DownloadEvent' = 18, 'PullRequestReviewEvent' = 19, 'ForkApplyEvent' = 20, 'Event' = 21, 'TeamAddEvent' = 22),
+    `actor_login` LowCardinality(String),
+    `repo_name` LowCardinality(String),
+    `repo_id` LowCardinality(String),
+    `created_at` DateTime,
+    `updated_at` DateTime,
+    `action` Enum8('none' = 0, 'created' = 1, 'added' = 2, 'edited' = 3, 'deleted' = 4, 'opened' = 5, 'closed' = 6, 'reopened' = 7, 'assigned' = 8, 'unassigned' = 9, 'labeled' = 10, 'unlabeled' = 11, 'review_requested' = 12, 'review_request_removed' = 13, 'synchronize' = 14, 'started' = 15, 'published' = 16, 'update' = 17, 'create' = 18, 'fork' = 19, 'merged' = 20)
+)
+ENGINE = MergeTree
+ORDER BY (repo_id, event_type, created_at)
+```
+
+Load the dataset for each table. This data is up to date as of `06/09/2024`:
+
+```sql
+INSERT INTO pypi.projects SELECT *
+FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/pypi/projects/projects.parquet')
+
+0 rows in set. Elapsed: 100.277 sec. Processed 13.19 million rows, 10.83 GB (131.58 thousand rows/s., 107.97 MB/s.)
+
+INSERT INTO github.github_events_v2 SELECT * FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/github_issues/subset/github_events_*.parquet')
 
 ```
 
-```sql
+The github events dataset is quite large at almost 100 GB. Users can target subsets by year e.g. 
 
+```sql
+SELECT *
+FROM s3Cluster('default', 'https://datasets-documentation.s3.eu-west-3.amazonaws.com/github_issues/subset/github_events_2024.parquet')
+SETTINGS parallel_distributed_insert_select = 2
 
 ```
 
-Load the dataset for each table:
+> Users can use [ClickPipes](https://clickhouse.com/cloud/clickpipes) to load this dataset. 
 
-```sql
+### 4. Create a query endpoint
 
-```
-
-### Create a query endpoint
-
-Save the following query in ClickHouse Cloud SQL console and create an endpoint with a developer API token.
+Save the following query in ClickHouse Cloud SQL console and create an endpoint with a Query Endpoints API token. Ensure you apply the readonly role to your endpoint
 
 **Note down the the credentials for the token and subsequent HTTP endpoint.**
 
@@ -90,17 +166,17 @@ SELECT * FROM project_details, stats
 
 ![Create endpoint](./public/github_stats_endpoint.gif)
 
-### Update local credentials
+### 5. Update local credentials
 
-Create a file `.env.local` in the root folder. Populate with the endpoint and API statistics recorded above e.g.
+Update the file `.env` in the root folder. Populate with the endpoint and API statistics recorded above e.g.
 
 ```bash
-API_KEY_ID=NOjlcSJ1dA8U4ZBgCbEE
-API_KEY_SECRET=5f1duHyIZKWtmr1aXFaMDWQo7yPGyRK0ybIAzp5gbN
-GITHUB_STATS_API=https://console-api.clickhouse.cloud/.api/query-endpoints/cd8584b4-2223-4e52-bb44-66893d170123/run
+API_KEY_ID=MdhWYPEpXaqiwGMjbXWT
+API_KEY_SECRET=4b1dKbabyQTvuKUWOnI08oXVbUD4tkaxKKjEwz7ORG
+GITHUB_STATS_API=https://console-api.clickhouse.cloud/.api/query-endpoints/0b39f27a-795d-4c3c-a837-cade98e1d51f/run
 ```
 
-### Running the app
+### 6. Running the app
 
 Run the development server:
 

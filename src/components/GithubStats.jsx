@@ -22,7 +22,7 @@ async function getGithubStats(package_name) {
   const stats = await runAPIEndpoint(process.env.GITHUB_STATS_API, {
     package_name: package_name,
   });
-  return stats.data.rows[0];
+  return stats;
 }
 
 export default async function GithubStats({ package_name }) {
@@ -33,36 +33,36 @@ export default async function GithubStats({ package_name }) {
         <>
           <PackageDetails
             name={package_name}
-            home_page={stats[6]}
-            author={stats[3]}
-            author_email={stats[4]}
-            license={stats[5]}
-            summary={stats[2]}
-            github_link={stats[7]}
-            version={stats[1]}
+            home_page={stats.home_page}
+            author={stats.author}
+            author_email={stats.author_email}
+            license={stats.license}
+            summary={stats.summary}
+            github_link={stats.github}
+            version={stats.max_version}
           />
           {stats[7] != "" ? (
             <div className="flex h-full gap-4 flex-row flex-wrap xl:flex-nowrap mt-8">
               <div className="flex gap-4 w-full sm:flex-row flex-col">
                 <SimpleStat
-                  value={stats[8]}
+                  value={stats.stars}
                   subtitle={"# Github stars"}
                   logo={"/stars.svg"}
                 />
                 <SimpleStat
-                  value={stats[9]}
+                  value={stats.prs}
                   subtitle={"# Pull requests"}
                   logo={"/prs.svg"}
                 />
               </div>
               <div className="flex gap-4 w-full sm:flex-row flex-col">
                 <SimpleStat
-                  value={stats[10]}
+                  value={stats.issues}
                   subtitle={"# Issues"}
                   logo={"/issues.svg"}
                 />
                 <SimpleStat
-                  value={stats[11]}
+                  value={stats.forks}
                   subtitle={"# Forks"}
                   logo={"/fork.svg"}
                 />
