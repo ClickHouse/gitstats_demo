@@ -15,7 +15,12 @@ async function runAPIEndpoint(endpoint, params) {
     },
     body: JSON.stringify(data),
   });
-  return response.json();
+  
+  return response.json().then(data=> {
+    return data;
+  }).catch(e => {
+    return {}
+  })
 }
 
 async function getGithubStats(package_name) {
@@ -29,7 +34,7 @@ export default async function GithubStats({ package_name }) {
   const stats = await getGithubStats(package_name);
   return (
     <div>
-      {stats ? (
+      {stats.name ? (
         <>
           <PackageDetails
             name={package_name}
@@ -41,7 +46,7 @@ export default async function GithubStats({ package_name }) {
             github_link={stats.github}
             version={stats.max_version}
           />
-          {stats[7] != "" ? (
+          {stats.github_link != "" ? (
             <div className="flex h-full gap-4 flex-row flex-wrap xl:flex-nowrap mt-8">
               <div className="flex gap-4 w-full sm:flex-row flex-col">
                 <SimpleStat

@@ -113,6 +113,7 @@ SELECT *
 FROM s3Cluster('default', 'https://datasets-documentation.s3.eu-west-3.amazonaws.com/github_issues/subset/github_events_2024.parquet')
 SETTINGS parallel_distributed_insert_select = 2
 
+0 rows in set. Elapsed: 296.479 sec. Processed 1.23 billion rows, 13.38 GB (4.15 million rows/s., 45.14 MB/s.)
 ```
 
 > Users can use [ClickPipes](https://clickhouse.com/cloud/clickpipes) to load this dataset. 
