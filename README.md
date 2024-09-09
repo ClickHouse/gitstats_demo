@@ -97,18 +97,18 @@ ORDER BY (repo_id, event_type, created_at)
 Load the dataset for each table. This data is up to date as of `06/09/2024`:
 
 ```sql
+-- pypi projects data
 INSERT INTO pypi.projects SELECT *
 FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/pypi/projects/projects.parquet')
 
-0 rows in set. Elapsed: 100.277 sec. Processed 13.19 million rows, 10.83 GB (131.58 thousand rows/s., 107.97 MB/s.)
-
-INSERT INTO github.github_events_v2 SELECT * FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/github_issues/subset/github_events_*.parquet')
-
+-- github events data
+INSERT INTO github.github_events SELECT * FROM s3('https://datasets-documentation.s3.eu-west-3.amazonaws.com/github_issues/subset/github_events_*.parquet')
 ```
 
 The github events dataset is quite large at almost 100 GB. Users can target subsets by year e.g. 
 
 ```sql
+INSERT INTO github.github_events
 SELECT *
 FROM s3Cluster('default', 'https://datasets-documentation.s3.eu-west-3.amazonaws.com/github_issues/subset/github_events_2024.parquet')
 SETTINGS parallel_distributed_insert_select = 2
