@@ -15,6 +15,7 @@ If you prefer to watch a video showing the steps to build this application, watc
 ## Pre-requisites
 
 * `>=` node v20.9.0
+* `>-` npm v10.1.0
 
 ## 1. Getting started
 
@@ -179,14 +180,22 @@ GITHUB_STATS_API=https://console-api.clickhouse.cloud/.api/query-endpoints/0b39f
 
 ### 6. Running the app
 
+Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+bun install
+```
+
 Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
 # or
 bun dev
 ```
